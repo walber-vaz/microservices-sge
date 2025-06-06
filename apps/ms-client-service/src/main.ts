@@ -1,10 +1,11 @@
+import { createWinstonLogger, LoggingInterceptor } from '@app/common';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { MsClientServiceModule } from './ms-client-service.module';
-import { ConsoleLogger, Logger } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
+import { MsClientServiceModule } from './ms-client-service.module';
 
 async function bootstrap() {
-  const logger = new Logger('MS-Client-Service');
+  const winstonLogger = createWinstonLogger('ms-client-service');
 
   const app = await NestFactory.createMicroservice(MsClientServiceModule, {
     transport: Transport.RMQ,
@@ -16,13 +17,15 @@ async function bootstrap() {
         durable: true,
       },
     },
-    logger: new ConsoleLogger({
-      colors: true,
-      json: true,
-    }),
+    logger: winstonLogger,
   });
+  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.enableShutdownHooks();
+
+  const logger = new Logger('MS-Client-Service');
 
   await app.listen();
   logger.log('🔵 MS-Client-Service is listening for messages...');
+  logger.log('📂 Logs: ./logs/ms-client-service.log');
 }
 bootstrap();
