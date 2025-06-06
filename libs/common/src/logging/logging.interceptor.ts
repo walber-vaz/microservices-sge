@@ -18,7 +18,6 @@ export class LoggingInterceptor implements NestInterceptor {
     const startTime = Date.now();
     const serviceName = process.env.SERVICE_NAME || 'unknown';
 
-    // Verificar se é context HTTP ou RPC
     const contextType = context.getType();
 
     if (contextType === 'http') {
@@ -27,7 +26,6 @@ export class LoggingInterceptor implements NestInterceptor {
       return this.handleRpcContext(context, next, startTime, serviceName);
     }
 
-    // Para outros tipos de context, apenas log básico
     return this.handleBasicContext(next, startTime, serviceName);
   }
 
