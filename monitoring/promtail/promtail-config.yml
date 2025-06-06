@@ -1,0 +1,85 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Logs dos microserviços (caminho corrigido)
+  - job_name: api-gateway
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: microservices
+          service: api-gateway
+          __path__: /var/log/app/api-gateway.log
+
+  - job_name: ms-user-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: microservices
+          service: ms-user-service
+          __path__: /var/log/app/ms-user-service.log
+
+  - job_name: ms-client-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: microservices
+          service: ms-client-service
+          __path__: /var/log/app/ms-client-service.log
+
+  - job_name: ms-product-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: microservices
+          service: ms-product-service
+          __path__: /var/log/app/ms-product-service.log
+
+  - job_name: ms-sales-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: microservices
+          service: ms-sales-service
+          __path__: /var/log/app/ms-sales-service.log
+
+  # Logs de erro separados
+  - job_name: error-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: microservices-errors
+          level: error
+          __path__: /var/log/app/*-error.log
+
+  # Capturar todos os logs de uma vez (alternativo)
+  - job_name: all-microservices-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: microservices-all
+          __path__: /var/log/app/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            service: service
+            level: level
+            message: message
+            timestamp: timestamp
+      - labels:
+          service:
+          level:
