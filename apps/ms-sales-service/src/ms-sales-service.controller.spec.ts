@@ -11,7 +11,9 @@ describe('MsSalesServiceController', () => {
       providers: [MsSalesServiceService],
     }).compile();
 
-    msSalesServiceController = app.get<MsSalesServiceController>(MsSalesServiceController);
+    msSalesServiceController = app.get<MsSalesServiceController>(
+      MsSalesServiceController,
+    );
   });
 
   describe('root', () => {

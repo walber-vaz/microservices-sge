@@ -11,12 +11,14 @@ describe('MsClientServiceController', () => {
       providers: [MsClientServiceService],
     }).compile();
 
-    msClientServiceController = app.get<MsClientServiceController>(MsClientServiceController);
+    msClientServiceController = app.get<MsClientServiceController>(
+      MsClientServiceController,
+    );
   });
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      expect(msClientServiceController.getHello()).toBe('Hello World!');
+      expect(msClientServiceController.getHealth()).toBe('Hello World!');
     });
   });
 });
