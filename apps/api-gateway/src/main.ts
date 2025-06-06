@@ -1,21 +1,22 @@
-import { NestFactory } from '@nestjs/core';
-import { ApiGatewayModule } from './api-gateway.module';
-import { ConsoleLogger, Logger, ValidationPipe } from '@nestjs/common';
+import { createWinstonLogger, LoggingInterceptor } from '@app/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestFactory } from '@nestjs/core';
 import { Transport } from '@nestjs/microservices';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ApiGatewayModule } from './api-gateway.module';
 
 async function bootstrap() {
-  const logger = new Logger('API-Gateway');
+  const winstonLogger = createWinstonLogger('api-gateway');
   const app = await NestFactory.create(ApiGatewayModule, {
-    logger: new ConsoleLogger({
-      colors: true,
-      json: true,
-    }),
+    logger: winstonLogger,
   });
 
   const configService = app.get(ConfigService);
+  const logger = new Logger('API-Gateway');
+
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalInterceptors(new LoggingInterceptor());
   app.setGlobalPrefix(configService.get<string>('API_PREFIX') || 'api');
   app.enableCors({
     origin: configService.get<string>('CORS_ORIGIN')?.split(',') || '*',
@@ -54,6 +55,7 @@ async function bootstrap() {
 
   logger.log(`🚀 API Gateway running on: http://localhost:${port}`);
   logger.log(`📚 Swagger docs: http://localhost:${port}/api/docs`);
+  logger.log(`📂 Logs: ./logs/api-gateway.log`);
 }
 
 bootstrap();
