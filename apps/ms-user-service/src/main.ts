@@ -1,10 +1,11 @@
+import { createWinstonLogger } from '@app/common';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { MsUserServiceModule } from './ms-user-service.module';
-import { ConsoleLogger, Logger } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
+import { MsUserServiceModule } from './ms-user-service.module';
 
 async function bootstrap() {
-  const logger = new Logger('MS-User-Service');
+  const winstonLogger = createWinstonLogger('ms-user-service');
 
   const app = await NestFactory.createMicroservice(MsUserServiceModule, {
     transport: Transport.RMQ,
@@ -15,13 +16,13 @@ async function bootstrap() {
         durable: true,
       },
     },
-    logger: new ConsoleLogger({
-      colors: true,
-      json: true,
-    }),
+    logger: winstonLogger,
   });
+  const logger = new Logger('MS-User-Service');
   await app.listen();
+
   logger.log('🟢 MS-User-Service is listening for messages...');
+  logger.log('📂 Logs: ./logs/ms-user-service.log');
 }
 
 bootstrap();
