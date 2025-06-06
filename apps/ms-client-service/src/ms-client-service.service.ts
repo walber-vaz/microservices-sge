@@ -20,6 +20,7 @@ export class MsClientServiceService {
   }
 
   getHealth(): Record<string, unknown> {
+    this.logger.log('Health check requested');
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
