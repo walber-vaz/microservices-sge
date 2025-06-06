@@ -1,10 +1,11 @@
+import { createWinstonLogger } from '@app/common';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { MsProductServiceModule } from './ms-product-service.module';
-import { ConsoleLogger, Logger } from '@nestjs/common';
 import { Transport } from '@nestjs/microservices';
+import { MsProductServiceModule } from './ms-product-service.module';
 
 async function bootstrap() {
-  const logger = new Logger('MS-Product-Service');
+  const winstonLogger = createWinstonLogger('ms-client-service');
 
   const app = await NestFactory.createMicroservice(MsProductServiceModule, {
     transport: Transport.RMQ,
@@ -17,13 +18,12 @@ async function bootstrap() {
         durable: true,
       },
     },
-    logger: new ConsoleLogger({
-      colors: true,
-      json: true,
-    }),
+    logger: winstonLogger,
   });
+  const logger = new Logger('MS-Product-Service');
 
   await app.listen();
   logger.log('🟡 MS-Product-Service is listening for messages...');
+  logger.log('📂 Logs: ./logs/ms-product-service.log');
 }
 bootstrap();
